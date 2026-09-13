@@ -1,0 +1,203 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,user-scalable=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="Daily Count">
+<meta name="theme-color" content="#6d4aa8">
+<title>Daily Count</title>
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="apple-touch-icon" sizes="180x180" href="icons/icon-180.png">
+<style>
+:root{--p:#6f4aa8;--bg:#f7f5fb;--card:#fff;--line:#ded7ea;--text:#2c2435;--muted:#766d80;--green:#1f9d55;--greenbg:#e7f7ed;--red:#d83b3b;--redbg:#fdeaea}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;width:100%;height:100%;overflow:hidden;font-family:-apple-system,BlinkMacSystemFont,"SF Pro Display","Segoe UI",sans-serif;background:var(--bg);color:var(--text)}
+body{padding:env(safe-area-inset-top) 10px env(safe-area-inset-bottom)}
+.app{height:100%;max-width:820px;margin:auto;display:flex;flex-direction:column}
+header{height:48px;display:flex;align-items:center;justify-content:space-between;gap:8px}
+h1{font-size:20px;margin:0;font-weight:800;color:var(--p)}
+button{border:0;border-radius:12px;font:inherit;font-weight:700;cursor:pointer}
+.iconbtn{width:42px;height:38px;background:#fff;border:1px solid var(--line);color:var(--p);font-size:19px}
+.datebar{display:flex;align-items:center;gap:7px;margin-bottom:7px}
+.datebar input{height:35px;flex:1;min-width:0;border:1px solid var(--line);border-radius:10px;background:#fff;padding:0 9px;font-size:14px;color:var(--text)}
+.datebar .small{height:35px;padding:0 10px;background:var(--p);color:white}
+.main{flex:1;min-height:0;display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:9px;min-width:0}
+.card h2{font-size:13px;margin:0 0 7px;color:var(--p);letter-spacing:.2px}
+.row{display:grid;grid-template-columns:1fr 92px;align-items:center;gap:6px;margin:5px 0}
+label{font-size:12px;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+input.num{width:100%;height:32px;border:1px solid #cfc5df;border-radius:8px;padding:0 7px;text-align:right;font-size:14px;background:#fff}
+input.num:focus,input[type=date]:focus{outline:2px solid #cbb9e4;border-color:var(--p)}
+.calc{display:grid;grid-template-columns:1fr auto 1fr;gap:5px;align-items:center;margin:6px 0}
+.calc input{width:100%;height:30px}
+.op{font-size:13px;font-weight:900;color:var(--p)}
+.total{margin-top:7px;padding-top:6px;border-top:1px solid var(--line);display:flex;justify-content:space-between;align-items:center;font-size:14px;font-weight:900}
+.total .value{font-size:16px}
+.checks{margin-top:8px;background:#faf8fd;border:1px solid var(--line);border-radius:11px;padding:7px}
+.checkhead{display:grid;grid-template-columns:1fr 80px 30px;gap:5px;font-size:10px;color:var(--muted);font-weight:800;margin-bottom:3px}
+.checkrow{display:grid;grid-template-columns:1fr 80px 30px;gap:5px;margin:4px 0}
+.checkrow input{height:29px;border:1px solid #cfc5df;border-radius:7px;padding:0 6px;font-size:12px;min-width:0}
+.del{background:#fff0f0;color:var(--red);font-size:15px}
+.add{height:30px;width:100%;margin-top:4px;background:#eee8f7;color:var(--p);font-size:12px}
+.bottom{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:8px}
+.big{background:#fff;border:1px solid var(--line);border-radius:14px;padding:8px}
+.bigline{display:flex;justify-content:space-between;align-items:center;font-weight:900}
+.bigline span:last-child{font-size:18px}
+.under{margin-top:7px;padding:7px;border-radius:10px;text-align:center;font-weight:900}
+.green{background:var(--greenbg);color:var(--green);border:1px solid #a9e0bd}
+.red{background:var(--redbg);color:var(--red);border:1px solid #efb0b0}
+.actions{display:grid;grid-template-columns:1fr 1fr 1fr;gap:7px;margin-top:7px}
+.actions button{height:36px;background:var(--p);color:#fff;font-size:12px}
+.actions button.secondary{background:#fff;color:var(--p);border:1px solid var(--line)}
+.toast{position:fixed;left:50%;bottom:18px;transform:translateX(-50%);background:#28212e;color:#fff;padding:9px 14px;border-radius:12px;font-size:12px;opacity:0;pointer-events:none;transition:.2s}
+.toast.show{opacity:1}
+@media(max-width:430px){
+ .app{max-width:410px}
+ header{height:42px}
+ h1{font-size:18px}
+ .main{gap:6px}
+ .card{padding:7px;border-radius:12px}
+ .row{grid-template-columns:1fr 78px;gap:4px;margin:4px 0}
+ label{font-size:10.5px}
+ input.num{height:29px;font-size:12.5px}
+ .card h2{font-size:11px;margin-bottom:5px}
+ .calc{gap:3px;margin:4px 0}
+ .total{font-size:12px}.total .value{font-size:14px}
+ .checks{padding:5px;margin-top:6px}
+ .checkhead,.checkrow{grid-template-columns:1fr 68px 27px}
+ .checkrow input{font-size:10px;height:27px}
+ .add{height:27px}
+ .bottom{gap:6px;margin-top:6px}
+ .big{padding:6px}
+ .bigline{font-size:11px}.bigline span:last-child{font-size:15px}
+ .under{font-size:12px;padding:6px}
+ .actions{gap:5px;margin-top:6px}.actions button{height:33px;font-size:10.5px}
+ .datebar{margin-bottom:5px}.datebar input{height:32px}.datebar .small{height:32px}
+}
+</style>
+</head>
+<body>
+<div class="app">
+<header>
+<h1>Daily Count</h1>
+<div style="display:flex;gap:5px"><button class="iconbtn" id="historyBtn" title="History">🗂️</button><button class="iconbtn" id="newBtn" title="New">＋</button></div>
+</header>
+
+<div class="datebar">
+<input id="date" type="date">
+<button class="small" id="saveBtn">Save</button>
+</div>
+
+<div class="main">
+<section class="card">
+<h2>Lottery</h2>
+<div class="calc"><input class="num" id="instant" type="number" step="0.01" placeholder="0"><span class="op">＋</span><input class="num" id="online" type="number" step="0.01" placeholder="0"></div>
+<div class="calc"><span class="op" style="text-align:center">Total</span><span class="op">=</span><input class="num" id="lotteryTotal" readonly></div>
+<div class="calc"><input class="num" id="lotteryPayout" type="number" step="0.01" placeholder="0"><span class="op">−</span><input class="num" id="lotto" readonly></div>
+<h2 style="margin-top:9px">Sales / Income</h2>
+<div class="row"><label>BUS</label><input class="num left" id="bus" type="number" step="0.01"></div>
+<div class="row"><label>GAS</label><input class="num left" id="gas" type="number" step="0.01"></div>
+<div class="row"><label>TAX</label><input class="num left" id="tax" type="number" step="0.01"></div>
+<div class="row"><label>LOTTO</label><input class="num left" id="leftLotto" readonly></div>
+<div class="total"><span>TOTAL</span><span class="value" id="leftTotal">0.00</span></div>
+</section>
+
+<section class="card">
+<h2>Cash / Credit</h2>
+<div class="row"><label>Cash</label><input class="num right" id="cash" type="number" step="0.01"></div>
+<div class="row"><label>Credit</label><input class="num" id="credit" readonly></div>
+<div class="calc"><input class="num" id="creditBase" type="number" step="0.01" placeholder="Credit"><span class="op">＋</span><input class="num" id="debit" type="number" step="0.01" placeholder="Debit"></div>
+<div class="checks">
+<div class="checkhead"><span>Check payer name</span><span style="text-align:right">Amount</span><span></span></div>
+<div id="checkRows"></div>
+<button class="add" id="addCheck">＋ Add Check</button>
+</div>
+<div class="row"><label>Check</label><input class="num" id="checkTotal" readonly></div>
+<div class="row"><label>EBT</label><input class="num right" id="ebt" type="number" step="0.01"></div>
+<div class="row"><label>Payout</label><input class="num right" id="payout" type="number" step="0.01"></div>
+<div class="row"><label>Coupon</label><input class="num right" id="coupon" type="number" step="0.01"></div>
+<div class="row"><label>House Charge</label><input class="num right" id="house" type="number" step="0.01"></div>
+<div class="total"><span>TOTAL</span><span class="value" id="rightTotal">0.00</span></div>
+</section>
+</div>
+
+<div class="bottom">
+<div class="big"><div class="bigline"><span>UNDER / OVER</span><span id="under">0.00</span></div><div class="under" id="underBox">Balanced</div></div>
+<div class="big"><div class="bigline"><span>Formula</span><span style="font-size:11px">Left − Right</span></div><div style="font-size:10px;color:var(--muted);margin-top:4px">Right total excludes House Charge, matching the sample layout.</div></div>
+</div>
+
+<div class="actions">
+<button id="pdfBtn">📄 PDF Report</button>
+<button class="secondary" id="clearBtn">Clear</button>
+<button class="secondary" id="historyBtn2">Saved Files</button>
+</div>
+</div>
+<div class="toast" id="toast"></div>
+
+<script>
+const $=id=>document.getElementById(id);
+const num=id=>parseFloat($(id).value)||0;
+const money=n=>(Math.round((n+Number.EPSILON)*100)/100).toFixed(2);
+const today=new Date().toISOString().slice(0,10);
+$('date').value=today;
+let checks=[];
+
+function addCheck(name='',amount=''){
+ const row=document.createElement('div'); row.className='checkrow';
+ row.innerHTML=`<input class="cname" placeholder="Payer name" value="${name.replaceAll('"','&quot;')}"><input class="camt" type="number" step="0.01" placeholder="0" value="${amount}"><button class="del">×</button>`;
+ row.querySelector('.del').onclick=()=>{row.remove();calc()};
+ row.querySelectorAll('input').forEach(x=>x.addEventListener('input',calc));
+ $('checkRows').appendChild(row); calc();
+}
+$('addCheck').onclick=()=>addCheck();
+addCheck('','');
+
+function calc(){
+ const lt=num('instant')+num('online'); $('lotteryTotal').value=money(lt);
+ const lotto=lt-num('lotteryPayout'); $('lotto').value=money(lotto); $('leftLotto').value=money(lotto);
+ const left=num('bus')+num('gas')+num('tax')+lotto; $('leftTotal').textContent=money(left);
+ const cr=num('creditBase')+num('debit'); $('credit').value=money(cr);
+ let ct=0; document.querySelectorAll('.camt').forEach(x=>ct+=parseFloat(x.value)||0); $('checkTotal').value=money(ct);
+ // House Charge is displayed separately and is not included in Right Total, matching the sample's written formula.
+ const right=num('cash')+cr+ct+num('ebt')+num('payout')+num('coupon');
+ $('rightTotal').textContent=money(right);
+ const diff=left-right; $('under').textContent=(diff>0?'+':'')+money(diff);
+ const box=$('underBox'); box.className='under '+(diff>0?'green':diff<0?'red':''); box.textContent=diff>0?'OVER':diff<0?'UNDER':'Balanced';
+}
+document.querySelectorAll('input').forEach(x=>x.addEventListener('input',calc));
+
+function data(){
+ return {date:$('date').value,instant:$('instant').value,online:$('online').value,lotteryPayout:$('lotteryPayout').value,bus:$('bus').value,gas:$('gas').value,tax:$('tax').value,cash:$('cash').value,creditBase:$('creditBase').value,debit:$('debit').value,ebt:$('ebt').value,payout:$('payout').value,coupon:$('coupon').value,house:$('house').value,checks:[...document.querySelectorAll('.checkrow')].map(r=>({name:r.querySelector('.cname').value,amount:r.querySelector('.camt').value}))};
+}
+function load(d){
+ Object.keys(d).forEach(k=>{if(k!=='checks' && $(k)) $(k).value=d[k]||''});
+ $('checkRows').innerHTML=''; (d.checks||[]).forEach(c=>addCheck(c.name,c.amount)); if(!(d.checks||[]).length)addCheck(); calc();
+}
+function save(){
+ const d=data(), all=JSON.parse(localStorage.getItem('dailyCounts')||'{}'); all[d.date]=d; localStorage.setItem('dailyCounts',JSON.stringify(all)); toast('Saved for '+d.date);
+}
+function history(){
+ const all=JSON.parse(localStorage.getItem('dailyCounts')||'{}'), dates=Object.keys(all).sort().reverse();
+ if(!dates.length){toast('No saved files yet');return}
+ const pick=prompt('Saved dates:\\n'+dates.join('\\n')+'\\n\\nEnter a date to open:');
+ if(pick && all[pick]) load(all[pick]); else if(pick) toast('Date not found');
+}
+function clearForm(){
+ if(confirm('Clear this day?')){document.querySelectorAll('input').forEach(x=>{if(x.id!=='date')x.value=''});$('checkRows').innerHTML='';addCheck();calc();}
+}
+function newDay(){ $('date').value=new Date().toISOString().slice(0,10); clearForm(); }
+function toast(t){$('toast').textContent=t;$('toast').classList.add('show');setTimeout(()=>$('toast').classList.remove('show'),1800)}
+$('saveBtn').onclick=save;$('historyBtn').onclick=history;$('historyBtn2').onclick=history;$('clearBtn').onclick=clearForm;$('newBtn').onclick=newDay;
+
+$('pdfBtn').onclick=()=>{
+ const d=data(); calc();
+ const html=`<html><head><title>Daily Count ${d.date}</title><style>body{font-family:Arial;padding:30px}h1{color:#6f4aa8}table{width:100%;border-collapse:collapse;margin:12px 0}td,th{padding:8px;border:1px solid #ddd;text-align:left}td:last-child,th:last-child{text-align:right}.total{font-weight:bold}.under{padding:12px;font-weight:bold;background:${num('leftTotal')-num('rightTotal')<0?'#fdeaea':'#e7f7ed'};color:${num('leftTotal')-num('rightTotal')<0?'#d83b3b':'#1f9d55'}}</style></head><body><h1>Daily Count Report</h1><p>Date: ${d.date}</p><table><tr><th>Left / Sales</th><th>Amount</th></tr>${[['BUS',num('bus')],['GAS',num('gas')],['TAX',num('tax')],['LOTTO',num('lotto')]].map(x=>`<tr><td>${x[0]}</td><td>$${money(x[1])}</td></tr>`).join('')}<tr class="total"><td>Total</td><td>$${$('leftTotal').textContent}</td></tr></table><table><tr><th>Right / Payments</th><th>Amount</th></tr>${[['Cash',num('cash')],['Credit',num('credit')],['Check',num('checkTotal')],['EBT',num('ebt')],['Payout',num('payout')],['Coupon',num('coupon')],['House Charge',num('house')]].map(x=>`<tr><td>${x[0]}</td><td>$${money(x[1])}</td></tr>`).join('')}<tr class="total"><td>Total</td><td>$${$('rightTotal').textContent}</td></tr></table><div class="under">Under / Over: ${$('under').textContent}</div><h3>Checks</h3><table><tr><th>Payer</th><th>Amount</th></tr>${d.checks.map(c=>`<tr><td>${c.name}</td><td>$${money(parseFloat(c.amount)||0)}</td></tr>`).join('')}</table><script>window.onload=()=>setTimeout(()=>window.print(),300)<\/script><script>if ('serviceWorker' in navigator) { window.addEventListener('load', () => navigator.serviceWorker.register('./sw.js').catch(()=>{})); }</script>
+</body></html>`;
+ const w=window.open(); if(w){w.document.write(html);w.document.close()} else toast('Allow pop-ups to create PDF');
+};
+calc();
+</script>
+<script>if ('serviceWorker' in navigator) { window.addEventListener('load', () => navigator.serviceWorker.register('./sw.js').catch(()=>{})); }</script>
+</body></html>
