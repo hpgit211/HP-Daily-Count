@@ -125,7 +125,7 @@ input.num:focus,input[type=date]:focus{outline:2px solid #cbb9e4;border-color:va
 
 <div class="bottom">
 <div class="big"><div class="bigline"><span>UNDER / OVER</span><span id="under">0.00</span></div><div class="under" id="underBox">Balanced</div></div>
-<div class="big"><div class="bigline"><span>Formula</span><span style="font-size:11px">Left − Right</span></div><div style="font-size:10px;color:var(--muted);margin-top:4px">Right total excludes House Charge, matching the sample layout.</div></div>
+<div class="big"><div class="bigline"><span>Formula</span><span style="font-size:11px">Left − Right</span></div><div style="font-size:10px;color:var(--muted);margin-top:4px">Right total includes House Charge.</div></div>
 </div>
 
 <div class="actions">
@@ -160,8 +160,7 @@ function calc(){
  const left=num('bus')+num('gas')+num('tax')+lotto; $('leftTotal').textContent=money(left);
  const cr=num('creditBase')+num('debit'); $('credit').value=money(cr);
  let ct=0; document.querySelectorAll('.camt').forEach(x=>ct+=parseFloat(x.value)||0); $('checkTotal').value=money(ct);
- // House Charge is displayed separately and is not included in Right Total, matching the sample's written formula.
- const right=num('cash')+cr+ct+num('ebt')+num('payout')+num('coupon');
+ const right=num('cash')+cr+ct+num('ebt')+num('payout')+num('coupon')+num('house');
  $('rightTotal').textContent=money(right);
  const diff=left-right; $('under').textContent=(diff>0?'+':'')+money(diff);
  const box=$('underBox'); box.className='under '+(diff>0?'green':diff<0?'red':''); box.textContent=diff>0?'OVER':diff<0?'UNDER':'Balanced';
